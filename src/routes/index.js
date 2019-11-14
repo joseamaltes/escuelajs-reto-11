@@ -36,11 +36,50 @@ const platziStore = (app) => {
     res.status(200).json(storeProducts);
   });
 
-  router.delete('/products/:id', async (req, res, next) => {
-    const { id } = req.params
-    const storeProducts = await productService.deleteProductById(id)
-    res.status(200).json(storeProducts);
-  });
+  router.put(
+    '/products/:id',
+    passport.authenticate('jwt', { session: false }),
+    scopesValidationHandler(['update:product']),
+    
+    async function(req, res, next) {
+      const { id } = req.params;
+      const { body: Product } = req;
+
+      try {
+        const updatedProductId = await ProductService.updateProductById({
+          id,
+          product
+        });
+
+        res.status(200).json({
+          data: updatedProductId,
+          message: 'product updated'
+        });
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
+
+  router.delete(
+    '/products/:id',
+    passport.authenticate('jwt', { session: false }),
+    scopesValidationHandler(['deleted:product']),
+    async function(req, res, next) {
+      const { id } = req.params;
+
+      try {
+        const storeProducts = await ProductService.deleteProductById({ id });
+
+        res.status(200).json({
+          data: deletedProductId,
+          message: 'Product deleted'
+        });
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
 
   router.get('*', (req, res) => {
     res.status(404).send('Error 404');

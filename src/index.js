@@ -3,6 +3,7 @@ const app = express();
 
 const { config } = require('./config');
 const platziStore = require('./routes')
+cont authApi = require('./routes/auth');
 
 app.get('/', (req, res) => {
   let userInfo = req.header("user-agent");
@@ -10,6 +11,8 @@ app.get('/', (req, res) => {
 });
 
 platziStore(app);
+app.use(express.json());
+authApi(app);
 
 app.listen(config.port, err => {
   if (err) {
